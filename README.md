@@ -3,6 +3,8 @@
 > [!NOTE]
 > 🤖 **Claude Opus 5.5 made this reproduction on behalf of Will**
 
+Reported upstream in [vercel/next.js#101014](https://github.com/vercel/next.js/issues/101014).
+
 With `cacheComponents: true`, `next build` spends a large share of its static-generation CPU rebuilding React component stacks that are thrown away. For every dynamic hole (a `<Suspense>`-wrapped component that reads request data), the prerender's `onError` reads `errorInfo.componentStack` to classify the hole. In production React has no component frame cache, so every read re-runs every component above the hole with a throwing dispatcher and formats an `Error` stack per frame. Next.js only runs a few regexes over that text (is there a `Suspense`, an outlet, metadata or viewport boundary above the hole?), and for a hole inside `<Suspense>` the text is then dropped. In an app with ~1,150 prerendered pages this was about 23% of the build workers' CPU; in this reproduction it is about half.
 
 ## Reproduction
