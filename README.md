@@ -14,7 +14,7 @@ npm run profile
 
 The app is one route, `app/[slug]/page.jsx`, with 400 static params. Each page has five `<Suspense>` boundaries around a component that calls `await connection()`, so every prerender hits five dynamic holes. The root layout wraps the page in 25 nested client components (`app/nest.jsx`), standing in for the providers and layout wrappers of a real app. `HOLES=0` renders the same tree without awaiting `connection()`, so the pages are fully static.
 
-`npm run profile` builds twice, `HOLES=1` and `HOLES=0`, with Node's CPU profiler in every process, then reads the build workers' profiles and prints their CPU time, the share spent under React's `DetermineComponentFrameRoot`, and where it is called from. Output on Next.js 16.5.0-canary.36, from a fresh clone (build logs omitted):
+`npm run profile` builds twice, `HOLES=1` and `HOLES=0`, with Node's CPU profiler in every process, then reads the build workers' profiles and prints their CPU time, the share spent under React's `DetermineComponentFrameRoot`, and where it is called from. Output on Next.js 16.5.0-canary.36 (build logs omitted):
 
 ```
 Static generation workers (CPU from Node --cpu-prof, idle excluded)
@@ -45,7 +45,7 @@ What the minified names are (the React and Next.js frames are in `next/dist/comp
 - `nV`: the `Error.prepareStackTrace` override `describeNativeComponentFrame` installs while it runs.
 - `a`: the repro's `Nest` component; `(anonymous)` and `F` are Next's `OuterLayoutRouter` and `InnerLayoutRouter`, re-run for the same reason.
 
-Across runs on a shared 16-core Mac the share with holes was 43% to 58%, lower when the machine was busier; total CPU varies with load, so compare the shares. The 3 ms without holes is the `/[slug]` fallback shell, which still has holes because its params are unknown. The latest stable release, `16.4.3`, gives the same result (58.0% with holes, 0.1% without).
+A fresh clone gave 58.5% with holes and 0.1% without. Across runs on a shared 16-core Mac the share with holes was 43% to 58.5%, lower when the machine was busier; total CPU varies with load, so compare the shares. The few ms without holes are the `/[slug]` fallback shell, which still has holes because its params are unknown. The latest stable release, `16.4.3`, gives the same result (58.0% with holes, 0.1% without).
 
 ## Expected
 
